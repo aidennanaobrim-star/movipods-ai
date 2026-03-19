@@ -1,2 +1,170 @@
 # movipods-ai
 AI filmmaking platform MVP - landing page, creator dashboard, scene generator, and portfolio with subscription integration.
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+// ===== LANDING PAGE =====
+app.get('/', (req, res) => {
+res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI Film Studio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-black text-white">
+
+<div class="text-center p-20">
+    <h1 class="text-5xl font-bold">Create Films with AI 🎬</h1>
+    <p class="mt-4">Write scripts. Generate scenes. Share your work.</p>
+
+    <input id="email" placeholder="Enter your email"
+        class="mt-6 p-3 text-black rounded" />
+
+    <br/>
+    <button onclick="signup()"
+        class="bg-green-500 px-6 py-3 rounded mt-4">
+        Join Demo
+    </button>
+
+    <div class="mt-6">
+        <a href="/dashboard" class="underline">Go to Dashboard</a> |
+        <a href="/portfolio" class="underline">View Portfolio</a>
+    </div>
+</div>
+
+<script>
+async function signup() {
+    const email = document.getElementById('email').value;
+
+    await fetch('/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+    });
+
+    alert("You're in! 🚀");
+}
+</script>
+
+</body>
+</html>
+`);
+});
+
+// ===== DASHBOARD =====
+app.get('/dashboard', (req, res) => {
+res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-900 text-white p-10">
+
+<h1 class="text-3xl mb-4">Creator Dashboard</h1>
+
+<textarea id="script" class="w-full p-4 text-black"
+placeholder="Write your script..."></textarea>
+
+<button onclick="generateScenes()"
+class="bg-blue-500 px-6 py-2 mt-4">
+Generate Scenes
+</button>
+
+<button class="bg-purple-500 px-6 py-2 mt-4 ml-2">
+Subscribe ($10/month)
+</button>
+
+<div id="output" class="mt-6"></div>
+
+<script>
+async function generateScenes() {
+    const script = document.getElementById('script').value;
+
+    const res = await fetch('/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ script })
+    });
+
+    const data = await res.json();
+
+    document.getElementById('output').innerHTML =
+        data.scenes.map(s => '<p>' + s + '</p>').join('');
+}
+</script>
+
+</body>
+</html>
+`);
+});
+
+// ===== PORTFOLIO =====
+app.get('/portfolio', (req, res) => {
+res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+<title>Portfolio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-black text-white p-10">
+
+<h1 class="text-3xl mb-6">Creator Portfolio</h1>
+
+<div class="grid grid-cols-3 gap-4">
+
+    <div class="bg-gray-800 p-4">
+        <h2>Short Film 1</h2>
+        <p>AI-generated story</p>
+    </div>
+
+    <div class="bg-gray-800 p-4">
+        <h2>Short Film 2</h2>
+        <p>Drama project</p>
+    </div>
+
+</div>
+
+<a href="/" class="underline mt-6 block">Back Home</a>
+
+</body>
+</html>
+`);
+});
+
+// ===== BACKEND APIs =====
+
+// Signup
+let users = [];
+
+app.post('/signup', (req, res) => {
+    const { email } = req.body;
+    users.push({ email });
+    res.json({ message: "Signup successful" });
+});
+
+// AI Scene Generator (Mock)
+app.post('/generate', (req, res) => {
+    const { script } = req.body;
+
+    const scenes = [
+        "🎬 Scene 1: " + script + " - Opening cinematic shot",
+        "🎬 Scene 2: Conflict builds",
+        "🎬 Scene 3: Emotional climax"
+    ];
+
+    res.json({ scenes });
+});
+
+// ===== START SERVER =====
+app.listen(3000, () => {
+    console.log("🚀 Running on http://localhost:3000");
+});
